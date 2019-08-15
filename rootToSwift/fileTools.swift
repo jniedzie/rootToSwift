@@ -76,6 +76,45 @@ class FileProcessor: NSObject {
     case noReturnOrName
   }
   
+  let rootTypes = [
+    "Char_t" : "char",
+    "UChar_t" : "unsigned char",
+    "Short_t" : "short",
+    "UShort_t" : "unsigned short",
+    "Int_t" : "int",
+    "UInt_t" : "unsigned int",
+    "Seek_t" : "int",
+    "Long_t" : "long",
+    "ULong_t" : "unsigned long",
+    "Float_t" : "float",
+    "Float16_t" : "float",
+    "Double_t" : "double",
+    "Double32_t" : "double",
+    "LongDouble_t" : "long double",
+    "Text_t" : "char",
+    "Bool_t" : "bool",
+    "Byte_t" : "unsigned char",
+    "Version_t" : "short",
+    "Option_t" : "const char",
+    "Ssiz_t" : "int",
+    "Real_t" : "float",
+    "Long64_t" : "long long",
+    "ULong64_t" : "unsigned long long",
+    "Axis_t" : "double",
+    "Stat_t" : "double",
+    "Font_t" : "short",
+    "Style_t" : "short",
+    "Marker_t" : "short",
+    "Width_t" : "short",
+    "Color_t" : "short",
+    "SCoord_t" : "short",
+    "Coord_t" : "double",
+    "Angle_t" : "float",
+    "Size_t" : "float",
+    
+    "TObject" : "SObject",
+  ]
+  
   /**
    Breaks down a string with C++ method declatation into its components
    - Parameters:
@@ -108,12 +147,16 @@ class FileProcessor: NSObject {
       else{
       throw FileProcessorError.noReturnOrName
     }
-
+    if let cType = rootTypes[returnType]  { returnType = cType }
+    
     let specifiers = Array(returnAndName[0 ..< returnAndName.count-2])
     
     for i in args.indices {
-      args[i] = args[i].replacingOccurrences(of: ")", with: "")
-      args[i] = args[i].replacingOccurrences(of: ";", with: "")
+      if let goodRange = args[i].range(of: #"(\s|\w|[*]|[&]|[:])*"#, options: .regularExpression) {
+        args[i] = String(args[i][goodRange])
+      }
+//      args[i] = args[i].replacingOccurrences(of: ")", with: "")
+//      args[i] = args[i].replacingOccurrences(of: ";", with: "")
       
       while args[i].starts(with: " ") {
         args[i].remove(at: args[i].startIndex)
@@ -130,11 +173,21 @@ class FileProcessor: NSObject {
     var argComponents = Array<(type:(String), name:(String))>()
     
     for arg in args {
-      var argument = (type: arg.components(separatedBy: .whitespaces)[0],
-                      name: arg.components(separatedBy: .whitespaces)[1])
+      var argComps = arg.components(separatedBy: .whitespaces)
+      argComps = argComps.filter { $0.range(of: #"(\s)*"#, options: .regularExpression) != nil && !$0.isEmpty }
       
-      if argument.name.range(of: #"[*]+[\w]*"#, options: .regularExpression) != nil {
-        let starsRange = argument.name.range(of: #"[*]+"#, options: .regularExpression)!
+      var argType = ""
+      for type in argComps[0 ..< argComps.count-1] {
+        argType += "\(type) "
+      }
+      if !argType.isEmpty { argType.removeLast() }
+      
+      if let cType = rootTypes[argType]     { argType = cType }
+      
+      var argument = (type: argType, name: argComps.last!)
+      
+      if argument.name.range(of: #"[*|&]+[\w]*"#, options: .regularExpression) != nil {
+        let starsRange = argument.name.range(of: #"[*|&]+"#, options: .regularExpression)!
         argument.type += argument.name[starsRange]
         argument.name.removeSubrange(starsRange)
       }
@@ -150,7 +203,7 @@ class FileProcessor: NSObject {
       - className: Output class name ("S" prefix will be added to it)
    - Returns: String containing beginning of the header
    */
-  func getHeaderBeginning(className:(String)) -> String {
+  func getHeaderBeginning(className:(String), currentDate:(String)) -> String {
     return """
     //  S\(className).h
     //  swiftRoot
@@ -179,6 +232,45 @@ class FileProcessor: NSObject {
     @end
     
     #endif /* S\(className)_h */
+    """
+  }
+  
+  func getImplementationBeginning(className:(String), currentDate:(String)) -> String {
+    return """
+    //  S\(className).m
+    //  swiftRoot
+    //
+    //  Created by Jeremi Niedziela on \(currentDate).
+    //  Copyright © 2019 Jeremi Niedziela. All rights reserved.
+    
+    #import "S\(className).h"
+    #import "CPPMembers.mm"
+    
+    @implementation S\(className)
+    
+    - (id) initWithSObject:(SObject*) object
+    {
+      self = [super init];
+      if(self){ self.cppMembers = object.cppMembers; }
+      return self;
+    }
+      
+    - (void)dealloc
+    {
+          
+    }
+    
+    -(T\(className)*) object
+    {
+        return (T\(className)*)self.cppMembers->object;
+    }\n
+    """
+  }
+
+  func getImplementationEnding() -> String {
+    return """
+    
+    @end
     """
   }
   

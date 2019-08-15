@@ -52,7 +52,7 @@ class FileProcessor: NSObject {
     text = text.replacingOccurrences(of: ";", with: ";\n")
     
     let returnAndNamePattern = #"[\w|\s|[*]]*"#
-    let argumentsPattern = #"[(]([\w|\W|\s|[&]|[*]*|[,]|[=]]*)[)](\s|\w)*[;]"#
+    let argumentsPattern = #"[(]([\w|\W|\s|[&]|(*)*|[,]|[=]]*)[)](\s|\w)*[;]"#
     
     let methodPattern = returnAndNamePattern + argumentsPattern
     
@@ -62,14 +62,17 @@ class FileProcessor: NSObject {
     
     for line in textByLine {
       if line.range(of: methodPattern, options: .regularExpression) != nil &&
-        line.range(of: #"ClassDef*"#, options: .regularExpression) == nil {
+        line.range(of: #"ClassDef*"#, options: .regularExpression) == nil &&
+        line.range(of: #"(\w|\s)*[~](\w|\s|[(]|[)]|[;])*"#, options: .regularExpression) == nil {
         publicMethods.append(line)
       }
     }
     return publicMethods
   }
   
+  /// Errors that can be thrown by FileProcessor
   enum FileProcessorError: Error {
+    /// noReturnOrName Thrown if provided method string didn't contain name or return type
     case noReturnOrName
   }
   
@@ -111,6 +114,10 @@ class FileProcessor: NSObject {
     for i in args.indices {
       args[i] = args[i].replacingOccurrences(of: ")", with: "")
       args[i] = args[i].replacingOccurrences(of: ";", with: "")
+      
+      while args[i].starts(with: " ") {
+        args[i].remove(at: args[i].startIndex)
+      }
     }
     args = args.filter { !$0.trimmingCharacters(in: .whitespaces).isEmpty }
     
@@ -135,6 +142,44 @@ class FileProcessor: NSObject {
     }
     
     return (name, returnType, specifiers, argComponents)
+  }
+  
+  /**
+   Creates beginnig of the wrapper's header
+   - Parameters:
+      - className: Output class name ("S" prefix will be added to it)
+   - Returns: String containing beginning of the header
+   */
+  func getHeaderBeginning(className:(String)) -> String {
+    return """
+    //  S\(className).h
+    //  swiftRoot
+    //
+    //  Created by Jeremi Niedziela on \(currentDate).
+    //  Copyright © 2019 Jeremi Niedziela. All rights reserved.
+    
+    #ifndef S\(className)_h
+    #define S\(className)_h
+    
+    #import "SObject.h"
+    
+    @interface S\(className) : SObject
+    
+    """
+  }
+  
+  /**
+   Creates ending of the wrapper's header
+   - Parameters:
+      - className: Output class name ("S" prefix will be added to it)
+   - Returns: String containing ending of the header
+   */
+  func getHeaderEnding(className:(String)) -> String {
+    return """
+    @end
+    
+    #endif /* S\(className)_h */
+    """
   }
   
   /**

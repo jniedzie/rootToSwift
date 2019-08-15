@@ -133,6 +133,13 @@ class Method: NSObject {
         argument.type += argument.name[starsRange]
         argument.name.removeSubrange(starsRange)
       }
+      if argument.type.isEmpty && !argument.name.isEmpty {
+        argument.type = argument.name
+        argument.name = "unknown_name"
+      }
+      if argument.name.isEmpty {
+        argument.name = "unknown_name"
+      }
       argComponents.append(argument)
     }
     return argComponents

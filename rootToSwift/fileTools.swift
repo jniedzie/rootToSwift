@@ -156,7 +156,7 @@ class FileProcessor: NSObject {
   private func getPublicFrom(text:(String)) -> String {
     let textByLine = text.components(separatedBy: .newlines)
     let publicPattern   = #"(\s)*public:(\s)*"#
-    let privatePattern  = #"(\s)*(private:|protected:)(\s)*"#
+    let privatePattern  = #"(\s)*(private:|protected:|class )(\s)*"#
     
     var isPublic = false
     var textPublic = ""

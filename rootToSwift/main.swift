@@ -30,13 +30,53 @@ for method in publicMethods {
       print("Could not translate string:\n\(method)\n to a method object")
       continue;
   }
-  let methodDeclaration = "-(\(methodPieces.returnType)) \(methodPieces.name)"
-  
-  headerText += methodDeclaration
-  implementationText += methodDeclaration
-  
-  methodPieces.addArgumentsList(headerText: &headerText, implementationText: &implementationText)
-  methodPieces.addMethodImplementation(implementationText: &implementationText)
+  if methodPieces.isConstructor {
+    let methodDeclaration = "-(id)init"
+    headerText += methodDeclaration
+    implementationText += methodDeclaration
+    
+    var first = true
+    for (type, name) in methodPieces.arguments {
+      if first {
+        headerText += "With\(name.capitalized):(\(type)) \(name)"
+        implementationText += "With\(name.capitalized):(\(type)) \(name)"
+        first = false
+      }
+      else {
+        headerText += " \(name):(\(type))\(name)"
+        implementationText += " \(name):(\(type))\(name)"
+      }
+    }
+    
+    implementationText += """
+    {
+      self = [super init];
+      if(self){
+        self.cppMembers = new CPPMembers(new T\(className)(
+    """
+    
+    first = true
+    for (_, name) in methodPieces.arguments {
+      if first { first = false }
+      else { implementationText += ", " }
+      implementationText += "\(name)"
+    }
+    
+    implementationText += """
+    ));
+      }
+      return self;
+    }\n\n
+    """
+  }
+  else{
+    let methodDeclaration = "-(\(methodPieces.returnType)) \(methodPieces.name)"
+    headerText += methodDeclaration
+    implementationText += methodDeclaration
+    
+    methodPieces.addArgumentsList(headerText: &headerText, implementationText: &implementationText)
+    methodPieces.addMethodImplementation(implementationText: &implementationText)
+  }
   headerText += ";\n\n"
 }
 

@@ -14,6 +14,7 @@ class Method: NSObject {
   var returnType: String
   var specifiers: [String]
   var arguments: [(type:String, name: String)]
+  var isConstructor: Bool
   
   /**
    Breaks down a string with C++ method declatation into its components
@@ -26,6 +27,7 @@ class Method: NSObject {
     self.returnType = ""
     self.specifiers = [""]
     self.arguments = [(type:"", name:"")]
+    self.isConstructor = false
     
     super.init()
     
@@ -34,12 +36,15 @@ class Method: NSObject {
     self.name = name
     
     // Get return type
-    guard let returnType = getReturnType(methodString: method) else { return nil }
-    self.returnType = returnType
-    
-    // Get specifiers
-    guard let specifiers = getSpecifiers(methodString: method) else { return nil }
-    self.specifiers = specifiers
+    if let returnType = getReturnType(methodString: method){
+      self.returnType = returnType
+      // Get specifiers
+      guard let specifiers = getSpecifiers(methodString: method) else { return nil }
+      self.specifiers = specifiers
+    }
+    else {
+      self.isConstructor = true
+    }
     
     // Get arguments
     guard let arguments = getArguments(methodString: method) else { return nil }
@@ -178,20 +183,18 @@ class Method: NSObject {
   func addMethodImplementation(implementationText:inout(String)) {
     
     if returnType == "SObject*" {
-      implementationText += "{\n TObject *obj = [self object]->\(name)("
+      implementationText += "{\n\tTObject *obj = [self object]->\(name)("
     }
     else {
-      implementationText += "{\nreturn [self object]->\(name)("
+      implementationText += "{\n\treturn [self object]->\(name)("
     }
     
-    if arguments.count > 0 {
-      var first = true
-      
-      for arg in arguments {
-        if first { first = false }
-        else { implementationText += ", " }
-        implementationText += "\(arg.name)"
-      }
+    var first = true
+    
+    for arg in arguments {
+      if first { first = false }
+      else { implementationText += ", " }
+      implementationText += "\(arg.name)"
     }
     
     if returnType == "SObject*" {

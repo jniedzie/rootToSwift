@@ -27,8 +27,8 @@ let rootTypes = [
   "Seek_t"       : "int",
   "Long_t"       : "long",
   "ULong_t"      : "unsigned long",
-  "Float_t"      : "float",
-  "Float16_t"    : "float",
+  "Float_t"      : "double",
+  "Float16_t"    : "double",
   "Double_t"     : "double",
   "Double32_t"   : "double",
   "LongDouble_t" : "long double",
@@ -38,7 +38,7 @@ let rootTypes = [
   "Version_t"    : "short",
   "Option_t"     : "const char",
   "Ssiz_t"       : "int",
-  "Real_t"       : "float",
+  "Real_t"       : "double",
   "Long64_t"     : "long long",
   "ULong64_t"    : "unsigned long long",
   "Axis_t"       : "double",
@@ -50,8 +50,8 @@ let rootTypes = [
   "Color_t"      : "short",
   "SCoord_t"     : "short",
   "Coord_t"      : "double",
-  "Angle_t"      : "float",
-  "Size_t"       : "float",
+  "Angle_t"      : "double",
+  "Size_t"       : "double",
 ]
 
 /**
@@ -85,5 +85,3 @@ func getRootClassName(fullName: String) -> String? {
   }
   return nil
 }
-
-

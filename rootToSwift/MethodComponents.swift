@@ -84,6 +84,29 @@ class MethodComponents: NSObject {
     
   }
   
+  static func ==(lhs: MethodComponents, rhs: MethodComponents) -> Bool{
+    
+    if lhs.name != rhs.name { return false }
+    if lhs.returnType != rhs.returnType { return false }
+    if lhs.isConstructor != rhs.isConstructor { return false }
+
+    if !lhs.specifiers.containsSameElements(as: rhs.specifiers) { return false }
+    
+    func contains(a:[(String, String)], b:(String, String)) -> Bool {
+      let (b1, b2) = b
+      for (a1, a2) in a { if a1 == b1 && a2 == b2 { return true } }
+      return false
+    }
+    
+    if lhs.arguments.count != rhs.arguments.count { return false }
+    
+    for arg in lhs.arguments {
+      if !contains(a: rhs.arguments, b: arg) { return false }
+    }
+    
+    return true
+  }
+  
   /**
    Adds all arguments of this method object to implementation and header strings provided
    - Parameters:

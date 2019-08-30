@@ -8,11 +8,15 @@
 
 import Foundation
 
-extension Array {
+extension Array where Element: Comparable {
   func secondToLast() -> Element? {
     if self.count < 2 {
       return nil
     }
     return self[self.count-2]
+  }
+  
+  func containsSameElements(as other: [Element]) -> Bool {
+    return self.count == other.count && self.sorted() == other.sorted()
   }
 }

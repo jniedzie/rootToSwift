@@ -95,8 +95,8 @@ func generateAllNeededClassesForClass(className: String) {
       
       for (name, headerText, implementationText) in addedClasses {
         alreadyImplementedClasses.insert(name)
-        fileProcessor.writeText(text: headerText, filePath: "\(outputPath)/S\(className).h")
-        fileProcessor.writeText(text: implementationText, filePath: "\(outputPath)/S\(className).mm")
+        fileProcessor.writeText(text: headerText, filePath: "\(outputPath)/S\(name).h")
+        fileProcessor.writeText(text: implementationText, filePath: "\(outputPath)/S\(name).mm")
       }
       
       for c in missingClasses {

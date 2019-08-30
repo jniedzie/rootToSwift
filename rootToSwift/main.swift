@@ -93,17 +93,22 @@ func generateAllNeededClassesForClass(className: String) {
       if alreadyImplementedClasses.contains(className) { continue }
       let (addedClasses, missingClasses) = getWrapperCodeForClass(className: className)
       
+      var missingIncludes = "#import \"SObject.h\"\n"
+      for missingClass in missingClasses {
+        missingIncludes += "#import \"S\(missingClass).h\"\n"
+      }
+      
       for (name, headerText, implementationText) in addedClasses {
         alreadyImplementedClasses.insert(name)
-        fileProcessor.writeText(text: headerText, filePath: "\(outputPath)/S\(name).h")
+        let headerTextWithIncludes = headerText.replacingOccurrences(of: "#import \"SObject.h\"",
+                                                                     with: missingIncludes)
+        fileProcessor.writeText(text: headerTextWithIncludes, filePath: "\(outputPath)/S\(name).h")
         fileProcessor.writeText(text: implementationText, filePath: "\(outputPath)/S\(name).mm")
       }
       
       for c in missingClasses {
         if !alreadyImplementedClasses.contains(c) { newNeededClasses.insert(c) }
       }
-      // Save files
-      
     }
     
     neededClasses = newNeededClasses

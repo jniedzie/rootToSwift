@@ -10,80 +10,95 @@ import Foundation
 
 let rootIncludePath = "/Applications/root_v6.16.00/include"
 let outputPath      = "/Users/jeremi/Library/Mobile Documents/com~apple~CloudDocs/Applications/swiftRoot/swiftRoot"
-let className       = "H2"
+let className = "H2"
 
 let fileProcessor = FileProcessor()
+let textProcessor = TextProcessor()
 
-// Create Objective-C++ header and imlpementation files for requested ROOT class
-let currentDate = getCurrentDate()
-var headerText = fileProcessor.getHeaderBeginning(className: className, currentDate: currentDate)
-var implementationText = fileProcessor.getImplementationBeginning(className: className, currentDate: currentDate)
+/**
+ Generates header and implementation text of Objective-C++ binding for given ROOT class
+ - Parameters:
+    - className: ROOT class name to be analyzed
+ - Return: tuple with header and implementation strings and other ROOT classes that this class uses
+ */
+func getWrapperCodeForClass(className: String)
+  -> (classes: [(name: String, header: String, implementation: String)], neededClasses:Set<String>) {
+  // Get classes declarations from ROOT header
+  let rootClassPath       = "\(rootIncludePath)/T\(className).h"
+  let inputText           = fileProcessor.getContentsOfFile(path: rootClassPath)
+  let classesNamesAndText = fileProcessor.getClassesFromText(text: inputText)
+  
+  var neededClasses = Set<String>()
+  var classes = Array<(name: String, header: String, implementation: String)>()
+  
+  // Get header and implementation for each class
+  for (className, classText) in classesNamesAndText {
+    print("Preparing class \(className)")
+    let publicMethods = fileProcessor.getPublicMethodsFromText(text: classText)
 
-// Get public methods from ROOT header
-var text = fileProcessor.getContentsOfFile(path: "\(rootIncludePath)/T\(className).h")
-let publicMethods = fileProcessor.getPublicMethods(text: text)
-
-// Fill in header and implementation files with public ROOT class methods
-for method in publicMethods {
-  guard let methodPieces = Method(method: method)
-    else{
-      print("Could not translate string:\n\(method)\n to a method object")
-      continue;
-  }
-  if methodPieces.isConstructor {
-    let methodDeclaration = "-(id)init"
-    headerText += methodDeclaration
-    implementationText += methodDeclaration
+    // Create Objective-C++ header and imlpementation files for requested ROOT class
+    var headerText = textProcessor.getHeaderBeginning(className: className)
+    var implementationText = textProcessor.getImplementationBeginning(className: className)
     
-    var first = true
-    for (type, name) in methodPieces.arguments {
-      if first {
-        headerText += "With\(name.capitalized):(\(type)) \(name)"
-        implementationText += "With\(name.capitalized):(\(type)) \(name)"
-        first = false
+    // Fill in header and implementation files with public ROOT class methods
+    for methodText in publicMethods {
+      guard let methodPieces = MethodComponents(methodString: methodText)
+        else{
+          print("Could not translate string:\n\(methodText)\n to a method object")
+          continue;
       }
-      else {
-        headerText += " \(name):(\(type))\(name)"
-        implementationText += " \(name):(\(type))\(name)"
+      
+      methodPieces.insertRootClassNames(classNames: &neededClasses)
+      
+      if methodPieces.isConstructor {
+        methodPieces.addConstructor(headerText: &headerText, implementationText: &implementationText)
+      }
+      else{
+        methodPieces.addMethod(headerText: &headerText, implementationText: &implementationText)
       }
     }
     
-    implementationText += """
-    {
-      self = [super init];
-      if(self){
-        self.cppMembers = new CPPMembers(new T\(className)(
-    """
+    // Add endings of header and implementation files
+    headerText += textProcessor.getHeaderEnding(className: className)
+    implementationText += textProcessor.getImplementationEnding()
     
-    first = true
-    for (_, name) in methodPieces.arguments {
-      if first { first = false }
-      else { implementationText += ", " }
-      implementationText += "\(name)"
-    }
-    
-    implementationText += """
-    ));
-      }
-      return self;
-    }\n\n
-    """
+    classes.append((name: className, header: headerText, implementation: implementationText))
   }
-  else{
-    let methodDeclaration = "-(\(methodPieces.returnType)) \(methodPieces.name)"
-    headerText += methodDeclaration
-    implementationText += methodDeclaration
-    
-    methodPieces.addArgumentsList(headerText: &headerText, implementationText: &implementationText)
-    methodPieces.addMethodImplementation(implementationText: &implementationText)
-  }
-  headerText += ";\n\n"
+  
+  return (classes: classes, neededClasses: neededClasses)
 }
 
-// Add endings of header and implementation files
-headerText += fileProcessor.getHeaderEnding(className: className)
-implementationText += fileProcessor.getImplementationEnding()
+/**
+ Recursively creates bindings for specified ROOT class and all classes used by this one
+ */
+func generateAllNeededClassesForClass(className: String) {
+  var alreadyImplementedClasses: Set = ["Object"]
+  var neededClasses: Set = ["H2"]
+  
+  while neededClasses.count != 0 {
+    var newNeededClasses = Set<String>()
+    
+    for className in neededClasses {
+      if alreadyImplementedClasses.contains(className) { continue }
+      let (addedClasses, missingClasses) = getWrapperCodeForClass(className: className)
+      
+      for (name, headerText, implementationText) in addedClasses {
+        alreadyImplementedClasses.insert(name)
+        fileProcessor.writeText(text: headerText, filePath: "\(outputPath)/S\(className).h")
+        fileProcessor.writeText(text: implementationText, filePath: "\(outputPath)/S\(className).mm")
+      }
+      
+      for c in missingClasses {
+        if !alreadyImplementedClasses.contains(c) { newNeededClasses.insert(c) }
+      }
+      // Save files
+      
+    }
+    
+    neededClasses = newNeededClasses
+  }
+}
 
-// Save files
-fileProcessor.writeText(text: headerText, filePath: "\(outputPath)/S\(className).h")
-fileProcessor.writeText(text: implementationText, filePath: "\(outputPath)/S\(className).mm")
+// Generate bindings:
+generateAllNeededClassesForClass(className: className)
+//getWrapperCodeForClass(className: "H2")

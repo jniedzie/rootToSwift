@@ -23,6 +23,7 @@ let rootTypes = [
   "UShort_t"     : "unsigned short",
   "Int_t"        : "int",
   "UInt_t"       : "unsigned int",
+  "Uint"         : "unsigned int",
   "Seek_t"       : "int",
   "Long_t"       : "long",
   "ULong_t"      : "unsigned long",
@@ -51,9 +52,6 @@ let rootTypes = [
   "Coord_t"      : "double",
   "Angle_t"      : "float",
   "Size_t"       : "float",
-  
-  "TObject"      : "SObject",
-  "TH1D"         : "SH1D",
 ]
 
 /**
@@ -72,6 +70,20 @@ func stripDefaultValue(name:inout String) {
   }
 }
 
-
+/**
+ Extracts base class name (removing prefix) from a type
+ */
+func getRootClassName(fullName: String) -> String? {
+  if fullName.range(of: #"S[\w]*"#, options: .regularExpression) != nil {
+    var className = fullName
+    className = className.replacingOccurrences(of: "const ", with: "")
+    className = className.replacingOccurrences(of: " ", with: "")
+    className = className.replacingOccurrences(of: "&", with: "")
+    className = className.replacingOccurrences(of: "*", with: "")
+    className.removeFirst()
+    return String(className)
+  }
+  return nil
+}
 
 

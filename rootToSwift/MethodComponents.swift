@@ -9,13 +9,14 @@
 import Foundation
 
 class MethodComponents: NSObject {
-  
+  // MARK: - Properties
   var name: String
   var returnType: String
   var specifiers: [String]
   var arguments: [(type:String, name: String)]
   var isConstructor: Bool
   
+  // MARK: - Constructor
   /**
    Breaks down a string with C++ method declatation into its components
    - Parameters:
@@ -84,6 +85,9 @@ class MethodComponents: NSObject {
     
   }
   
+  // MARK: - Comparison operator
+  
+  /// Comparison operator
   static func ==(lhs: MethodComponents, rhs: MethodComponents) -> Bool{
     
     if lhs.name != rhs.name { return false }
@@ -107,61 +111,85 @@ class MethodComponents: NSObject {
     return true
   }
   
+  // MARK: - Public methods
+  
+  
   /**
-   Adds all arguments of this method object to implementation and header strings provided
-   - Parameters:
-      - headerText: string to which header-style arguments will be added
-      - implementationText: string to which implementation-style arguments will be added
-   */
-  func addMethod(headerText: inout String, implementationText: inout String) {
-    let methodDeclaration = "-(\(returnType)) \(name)"
-    headerText += methodDeclaration
-    implementationText += methodDeclaration
+   Adds objective-C declaration and implementation of this method to `headerText` and `implementationText` resoectively
+  - Parameters:
+      - header: string to which header-style arguments will be added
+      - implementation: string to which implementation-style arguments will be added
+  */
+  func addMethod(toHeader header: inout String, andImplementation implementation: inout String) {
+    
+    let methodDeclaration = isConstructor ? "-(id)init" : "-(\(returnType)) \(name)"
+    header += methodDeclaration
+    implementation += methodDeclaration
     
     var first = true
-    
     for arg in arguments {
-      var argNameNoDefault = arg.name
-      stripDefaultValue(name: &argNameNoDefault)
+      let name = arg.name
+      let type = arg.type
+      let nameNoDefault = arg.name.strippingDefaultValue()
       
       if first {
+        if isConstructor {
+          header += "With\(name.capitalized):(\(type)) \(name)"
+          implementation += "With\(name.capitalized):(\(type)) \(name)"
+        }
+        else {
+          header += ":(\(type)) \(nameNoDefault) "
+          implementation += ":(\(type)) \(name) "
+        }
         first = false
-        headerText += ":(\(arg.type)) \(argNameNoDefault) "
-        implementationText += ":(\(arg.type)) \(arg.name) "
       }
       else {
-        headerText += "\(argNameNoDefault):(\(arg.type)) \(argNameNoDefault) "
-        implementationText += "\(argNameNoDefault):(\(arg.type)) \(arg.name) "
+        header += "\(nameNoDefault):(\(type)) \(nameNoDefault) "
+        implementation += "\(nameNoDefault):(\(type)) \(name) "
       }
     }
-    headerText += ";\n\n"
-    addMethodImplementation(implementationText: &implementationText)
+    header += ";\n\n"
+    addMethod(toImplementation: &implementation)
   }
   
   /**
-   Adds methods body to the string provided
-   - Parameters:
-   - implementationText: string to which implementation-style arguments will be added
+   Adds method/constructor body to the provided `implementation` string.
    */
-  private func addMethodImplementation(implementationText: inout String) {
+  private func addMethod(toImplementation implementation: inout String) {
     
-    if returnType == "SObject*" {
-      implementationText += "{\n\tTObject *obj = [self object]->\(name)("
+    if isConstructor {
+      implementation += """
+      {
+      self = [super init];
+      if(self){
+      self.cppMembers = new CPPMembers(new T\(className)(
+      """
+    }
+    else if returnType == "SObject*" {
+      implementation += "{\n\tTObject *obj = [self object]->\(name)("
     }
     else {
-      implementationText += "{\n\treturn [self object]->\(name)("
+      implementation += "{\n\treturn [self object]->\(name)("
     }
     
     var first = true
     
-    for arg in arguments {
+    for (_, name) in arguments {
       if first { first = false }
-      else { implementationText += ", " }
-      implementationText += "\(arg.name)"
+      else { implementation += ", " }
+      implementation += "\(name)"
     }
     
-    if returnType == "SObject*" {
-      implementationText += """
+    if isConstructor {
+      implementation += """
+      ));
+      }
+      return self;
+      }\n\n
+      """
+    }
+    else if returnType == "SObject*" {
+      implementation += """
       );
       CPPMembers *members = new CPPMembers(obj);
       return [[SObject alloc] initWithObject:members];
@@ -169,50 +197,8 @@ class MethodComponents: NSObject {
       """
     }
     else {
-      implementationText += ");\n}\n\n"
+      implementation += ");\n}\n\n"
     }
-  }
-  
-  func addConstructor(headerText: inout String, implementationText: inout String) {
-    let methodDeclaration = "-(id)init"
-    headerText += methodDeclaration
-    implementationText += methodDeclaration
-    
-    var first = true
-    for (type, name) in arguments {
-      if first {
-        headerText += "With\(name.capitalized):(\(type)) \(name)"
-        implementationText += "With\(name.capitalized):(\(type)) \(name)"
-        first = false
-      }
-      else {
-        headerText += " \(name):(\(type))\(name)"
-        implementationText += " \(name):(\(type))\(name)"
-      }
-    }
-    
-    headerText += ";\n\n"
-    
-    implementationText += """
-    {
-      self = [super init];
-      if(self){
-        self.cppMembers = new CPPMembers(new T\(className)(
-    """
-    
-    first = true
-    for (_, name) in arguments {
-      if first { first = false }
-      else { implementationText += ", " }
-      implementationText += "\(name)"
-    }
-    
-    implementationText += """
-      ));
-      }
-      return self;
-    }\n\n
-    """
   }
   
   /**
@@ -220,22 +206,19 @@ class MethodComponents: NSObject {
    - Parameters:
       - classNames: set to which found ROOT classes will be inserted
    */
-  func insertRootClassNames(classNames: inout Set<String>) {
+  func insertRootClasses(withNames names: inout Set<String>) {
     if let className = getRootClassName(fullName: returnType) {
-      classNames.insert(className)
+      names.insert(className)
     }
     
     for arg in arguments {
       if let className = getRootClassName(fullName: arg.type) {
-        classNames.insert(className)
+        names.insert(className)
       }
     }
   }
   
-//------------------------------------------------------------------------
-// Private methods
-//------------------------------------------------------------------------
-  
+  // MARK: - Private methods
   private func getNameAndArgs(methodString: String) -> [String]? {
     var nameAndArgs = methodString.components(separatedBy: "(")
     nameAndArgs = nameAndArgs.filter { $0 != "" }

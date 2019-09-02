@@ -13,6 +13,8 @@
 		1F9FA9A1230578FE00F9723C /* Helpers.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1F9FA9A0230578FE00F9723C /* Helpers.swift */; };
 		1F9FA9A323057E7400F9723C /* MethodComponents.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1F9FA9A223057E7400F9723C /* MethodComponents.swift */; };
 		1FAB88E123193C06004E3023 /* TextProcessor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1FAB88E023193C06004E3023 /* TextProcessor.swift */; };
+		1FAB8B93231D4DFC004E3023 /* ClassBinding.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1FAB8B92231D4DFB004E3023 /* ClassBinding.swift */; };
+		1FAB8B95231D5928004E3023 /* StringExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1FAB8B94231D5928004E3023 /* StringExtension.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -35,6 +37,8 @@
 		1F9FA9A0230578FE00F9723C /* Helpers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Helpers.swift; sourceTree = "<group>"; };
 		1F9FA9A223057E7400F9723C /* MethodComponents.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MethodComponents.swift; sourceTree = "<group>"; };
 		1FAB88E023193C06004E3023 /* TextProcessor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextProcessor.swift; sourceTree = "<group>"; };
+		1FAB8B92231D4DFB004E3023 /* ClassBinding.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ClassBinding.swift; sourceTree = "<group>"; };
+		1FAB8B94231D5928004E3023 /* StringExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StringExtension.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -70,9 +74,11 @@
 				1F4E655322FC40BB001225FC /* main.swift */,
 				1F4E655A22FC46C3001225FC /* FileProcessor.swift */,
 				1F9FA9A223057E7400F9723C /* MethodComponents.swift */,
+				1FAB8B92231D4DFB004E3023 /* ClassBinding.swift */,
 				1F9FA9A0230578FE00F9723C /* Helpers.swift */,
 				1FAB88E023193C06004E3023 /* TextProcessor.swift */,
 				1F4E657A23043DE1001225FC /* ArrayExtension.swift */,
+				1FAB8B94231D5928004E3023 /* StringExtension.swift */,
 			);
 			path = rootToSwift;
 			sourceTree = "<group>";
@@ -134,9 +140,11 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				1FAB8B93231D4DFC004E3023 /* ClassBinding.swift in Sources */,
 				1F9FA9A323057E7400F9723C /* MethodComponents.swift in Sources */,
 				1F4E657B23043DE1001225FC /* ArrayExtension.swift in Sources */,
 				1F4E655422FC40BB001225FC /* main.swift in Sources */,
+				1FAB8B95231D5928004E3023 /* StringExtension.swift in Sources */,
 				1F4E655B22FC46C3001225FC /* FileProcessor.swift in Sources */,
 				1F9FA9A1230578FE00F9723C /* Helpers.swift in Sources */,
 				1FAB88E123193C06004E3023 /* TextProcessor.swift in Sources */,

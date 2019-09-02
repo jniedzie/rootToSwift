@@ -62,15 +62,6 @@ func getCurrentDate() -> String {
 }
 
 /**
- Removes what looks like default arguments declaration in C from the provided string
- */
-func stripDefaultValue(name:inout String) {
-  if let nameRange = name.range(of: #"(\w)*"#, options: .regularExpression) {
-    name = String(name[nameRange])
-  }
-}
-
-/**
  Extracts base class name (removing prefix) from a type
  */
 func getRootClassName(fullName: String) -> String? {

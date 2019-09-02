@@ -24,6 +24,18 @@ class FileProcessor: NSObject {
   }
   
   /**
+   Get classes declarations from ROOT header
+   - Parameters:
+       - rootHeader: Base ROOT header name, e.g. `Browser` for `TBrowser.h`
+   - Returns: Array of classes names and corresponding C++ declaration read from ROOT header
+   */
+  func getClasses(fromRootHeader rootHeader: String) -> [(name: String, text: String)] {
+    let rootClassPath       = "\(rootIncludePath)/T\(rootHeader).h"
+    let inputText           = fileProcessor.getContentsOfFile(path: rootClassPath)
+    return getClassesFromText(text: inputText)
+  }
+  
+  /**
    Finds all class declarations inside of a single string and splits them into array of strings
    */
   func getClassesFromText(text: String) -> [(name:String, text: String)] {

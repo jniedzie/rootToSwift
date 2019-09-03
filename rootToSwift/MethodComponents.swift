@@ -191,14 +191,19 @@ class MethodComponents: NSObject {
     
     var first = true
     
-    for (_, argName) in arguments {
-      guard let arg = argName else { continue }
-      
-      if first { first = false }
-      else { implementation += ", " }
-      implementation += "\(arg)"
+    if isCopyConstuctor() {
+      implementation += "*[&\(arguments.first!.name ?? "") object]"
     }
-    
+    else{
+      for (_, argName) in arguments {
+        guard let arg = argName else { continue }
+        
+        if first { first = false }
+        else { implementation += ", " }
+        implementation += "\(arg)"
+      }
+    }
+      
     if isConstructor {
       implementation += """
       ));
@@ -336,4 +341,17 @@ class MethodComponents: NSObject {
     return argument
   }
   
+  private func isCopyConstuctor() -> Bool {
+    if arguments.count == 1 {
+      if let arg = arguments.first {
+        let type = arg.type
+        let baseName = name.removingFirstCharacter()
+        
+        if type.contains("const") && type.contains("&") && type.contains(baseName) {
+          return true
+        }
+      }
+    }
+    return false
+  }
 }

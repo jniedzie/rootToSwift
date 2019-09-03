@@ -21,4 +21,11 @@ extension String {
     return self
   }
   
+  func removingFirstCharacter() -> String {
+    if self.isEmpty { return "" }
+    var newString = self
+    newString.removeFirst()
+    return newString
+  }
+  
 }

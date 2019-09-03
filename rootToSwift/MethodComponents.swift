@@ -42,6 +42,10 @@ class MethodComponents: NSObject {
       // Get specifiers
       guard let specifiers = getSpecifiers(methodString: methodString) else { return nil }
       self.specifiers = specifiers
+      if specifiers.contains("const"){
+        self.returnType = "const "+self.returnType
+        self.specifiers.removeAll(where: {$0 == "const"})
+      }
     }
     else {
       self.isConstructor = true
@@ -129,7 +133,6 @@ class MethodComponents: NSObject {
       header += "/*\n"
       implementation += "/*\n"
     }
-    
     let methodDeclaration = isConstructor ? "-(id)init" : "-(\(returnType)) \(name)"
     header += methodDeclaration
     implementation += methodDeclaration

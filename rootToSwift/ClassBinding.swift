@@ -40,7 +40,8 @@ class ClassBinding {
       alreadyAddedMethods.insert(methodPieces)
       
       methodPieces.insertRootClasses(withNames: &neededClasses)
-      methodPieces.addMethod(toHeader: &header, andImplementation: &implementation)
+      methodPieces.addMethod(toHeader: &header, andImplementation: &implementation,
+                             commentOut: methodPieces.isOperator())
     }
     
     header += textProcessor.getHeaderEnding(className: name)

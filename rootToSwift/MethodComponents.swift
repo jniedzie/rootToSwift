@@ -120,7 +120,14 @@ class MethodComponents: NSObject {
       - header: string to which header-style arguments will be added
       - implementation: string to which implementation-style arguments will be added
   */
-  func addMethod(toHeader header: inout String, andImplementation implementation: inout String) {
+  func addMethod(toHeader header: inout String,
+                 andImplementation implementation: inout String,
+                 commentOut: Bool = false) {
+    
+    if commentOut {
+      header += "/*\n"
+      implementation += "/*\n"
+    }
     
     let methodDeclaration = isConstructor ? "-(id)init" : "-(\(returnType)) \(name)"
     header += methodDeclaration
@@ -149,8 +156,13 @@ class MethodComponents: NSObject {
         implementation += "\(nameNoDefault):(\(type)) \(name) "
       }
     }
-    header += ";\n\n"
+    header += ";\n"
     addMethod(toImplementation: &implementation)
+    
+    if commentOut {
+      header += "*/\n"
+      implementation += "*/\n"
+    }
   }
   
   /**
@@ -188,7 +200,7 @@ class MethodComponents: NSObject {
       ));
         }
         return self;
-      }\n\n
+      }\n
       """
     }
     else if returnType == "SObject*" {
@@ -196,11 +208,11 @@ class MethodComponents: NSObject {
       );
         CPPMembers *members = new CPPMembers(obj);
         return [[SObject alloc] initWithObject:members];
-      }\n\n
+      }\n
       """
     }
     else {
-      implementation += ");\n}\n\n"
+      implementation += ");\n}\n"
     }
   }
   
@@ -219,6 +231,13 @@ class MethodComponents: NSObject {
         names.insert(name)
       }
     }
+  }
+  
+  /// Checks if this method is an overloaded operator
+  func isOperator() -> Bool {
+    let operatorPattern = #"operator"#
+    if name.range(of: operatorPattern, options: .regularExpression) != nil { return true }
+    return false
   }
   
   // MARK: - Private methods

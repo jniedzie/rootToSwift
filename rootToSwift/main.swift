@@ -52,7 +52,11 @@ func generateAllNeededClasses(forClass className: String) {
       let (addedClasses, missingClasses) = getWrapperCodeForClass(className: className)
       
       var missingIncludes = "#import \"SObject.h\"\n"
-      for missingClass in missingClasses { missingIncludes += "#import \"S\(missingClass).h\"\n" }
+      for missingClass in missingClasses {
+        if missingClass != className && missingClass != "Object" {
+          missingIncludes += "#import \"S\(missingClass).h\"\n"
+        }
+      }
       
       for classBinding in addedClasses {
         alreadyImplementedClasses.insert(classBinding.name)

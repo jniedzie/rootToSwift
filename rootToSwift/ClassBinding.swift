@@ -27,8 +27,8 @@ class ClassBinding {
     
     var alreadyAddedMethods = Set<MethodComponents>()
     
-    header = textProcessor.getHeaderBeginning(className: className)
-    implementation = textProcessor.getImplementationBeginning(className: className)
+    header = textProcessor.getHeaderBeginning(className: name)
+    implementation = textProcessor.getImplementationBeginning(className: name)
     
     for methodText in methods {
       guard let methodPieces = MethodComponents(methodString: methodText)
@@ -43,7 +43,7 @@ class ClassBinding {
       methodPieces.addMethod(toHeader: &header, andImplementation: &implementation)
     }
     
-    header += textProcessor.getHeaderEnding(className: className)
+    header += textProcessor.getHeaderEnding(className: name)
     implementation += textProcessor.getImplementationEnding()
   }
   

@@ -68,9 +68,9 @@ class TextProcessor {
     
     - (id) initWithSObject:(SObject*) object
     {
-    self = [super init];
-    if(self){ self.cppMembers = object.cppMembers; }
-    return self;
+      self = [super init];
+      if(self){ self.cppMembers = object.cppMembers; }
+      return self;
     }
     
     - (void)dealloc
@@ -80,7 +80,7 @@ class TextProcessor {
     
     -(T\(className)*) object
     {
-    return (T\(className)*)self.cppMembers->object;
+      return (T\(className)*)self.cppMembers->object;
     }\n
     """
   }

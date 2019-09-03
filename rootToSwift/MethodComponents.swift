@@ -134,8 +134,8 @@ class MethodComponents: NSObject {
       
       if first {
         if isConstructor {
-          header += "With\(name.capitalized):(\(type)) \(name)"
-          implementation += "With\(name.capitalized):(\(type)) \(name)"
+          header += "With\(name.capitalized):(\(type)) \(name) "
+          implementation += "With\(name.capitalized):(\(type)) \(name) "
         }
         else {
           header += ":(\(type)) \(nameNoDefault) "
@@ -160,9 +160,9 @@ class MethodComponents: NSObject {
     if isConstructor {
       implementation += """
       {
-      self = [super init];
-      if(self){
-      self.cppMembers = new CPPMembers(new T\(className)(
+        self = [super init];
+        if(self){
+          self.cppMembers = new CPPMembers(new \(name)(
       """
     }
     else if returnType == "SObject*" {
@@ -183,16 +183,16 @@ class MethodComponents: NSObject {
     if isConstructor {
       implementation += """
       ));
-      }
-      return self;
+        }
+        return self;
       }\n\n
       """
     }
     else if returnType == "SObject*" {
       implementation += """
       );
-      CPPMembers *members = new CPPMembers(obj);
-      return [[SObject alloc] initWithObject:members];
+        CPPMembers *members = new CPPMembers(obj);
+        return [[SObject alloc] initWithObject:members];
       }\n\n
       """
     }
@@ -204,16 +204,16 @@ class MethodComponents: NSObject {
   /**
    Inserts base root class names found in return type and arguments of this method into provided set
    - Parameters:
-      - classNames: set to which found ROOT classes will be inserted
+      - withNames: set to which found ROOT classes will be inserted
    */
   func insertRootClasses(withNames names: inout Set<String>) {
-    if let className = getRootClassName(fullName: returnType) {
-      names.insert(className)
+    if let name = getRootClassName(fullName: returnType) {
+      names.insert(name)
     }
     
     for arg in arguments {
-      if let className = getRootClassName(fullName: arg.type) {
-        names.insert(className)
+      if let name = getRootClassName(fullName: arg.type) {
+        names.insert(name)
       }
     }
   }

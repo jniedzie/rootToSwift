@@ -8,14 +8,11 @@
 
 import Foundation
 
-let rootIncludePath = "/Applications/root_v6.16.00/include"
-let outputPath      = "/Users/jeremi/Library/Mobile Documents/com~apple~CloudDocs/Applications/swiftRoot/swiftRoot"
-let className       = "H2"
-
 let fileProcessor = FileProcessor()
 let textProcessor = TextProcessor()
 
-
+let rootIncludePath = "/Applications/root_v6.16.00/include"
+let outputPath      = "/Users/jeremi/Library/Mobile Documents/com~apple~CloudDocs/Applications/swiftRoot/swiftRoot"
 
 /**
  Generates header and implementation text of Objective-C++ binding for given ROOT class
@@ -72,6 +69,13 @@ func generateAllNeededClasses(forClass className: String) {
   }
 }
 
-// Generate bindings:
-generateAllNeededClasses(forClass: className)
-//getWrapperCodeForClass(className: "H2")
+func main() {
+  let className       = "H2"
+  
+  // Generate bindings:
+  generateAllNeededClasses(forClass: className)
+  //getWrapperCodeForClass(className: "H2")
+}
+
+main()
+

@@ -183,7 +183,7 @@ class MethodComponents: NSObject {
       """
     }
     else if returnType == "SObject*" {
-      implementation += "{\n\tTObject *obj = [self object]->\(name)("
+      implementation += "{\n\tTObject *tobj = [self object]->\(name)("
     }
     else {
       implementation += "{\n\treturn [self object]->\(name)("
@@ -195,12 +195,14 @@ class MethodComponents: NSObject {
       implementation += "*[&\(arguments.first!.name ?? "") object]"
     }
     else{
-      for (_, argName) in arguments {
+      for (argType, argName) in arguments {
         guard let arg = argName else { continue }
         
         if first { first = false }
         else { implementation += ", " }
-        implementation += "\(arg)"
+        
+        if argType.contains("SObject")  { implementation += "(TObject*)[\(arg) get]" }
+        else                            { implementation += "\(arg)" }
       }
     }
       
@@ -215,7 +217,7 @@ class MethodComponents: NSObject {
     else if returnType == "SObject*" {
       implementation += """
       );
-        CPPMembers *members = new CPPMembers(obj);
+        CPPMembers *members = new CPPMembers(tobj);
         return [[SObject alloc] initWithObject:members];
       }\n
       """

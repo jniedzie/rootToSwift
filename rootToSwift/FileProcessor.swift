@@ -88,7 +88,7 @@ class FileProcessor: NSObject {
     var publicText = fileProcessor.getPublicFrom(text: textTmp)
     
     let implementationPattern = #"[{](\w|\s|[=]|[(]|[)]|[,]|[;]|[->]|[?]|[:])*[}]"#
-    publicText = publicText.replacingOccurrences(of: implementationPattern, with: "", options: .regularExpression)
+    publicText = publicText.replacingOccurrences(of: implementationPattern, with: ";", options: .regularExpression)
     
     publicText = publicText.replacingOccurrences(of: "\n", with: "")
     publicText = publicText.replacingOccurrences(of: ";", with: ";\n")

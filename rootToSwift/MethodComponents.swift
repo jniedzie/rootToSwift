@@ -122,6 +122,7 @@ class MethodComponents: NSObject {
   */
   func addMethod(toHeader header: inout String,
                  andImplementation implementation: inout String,
+                 labelFirstArgument: Bool,
                  commentOut: Bool = false) {
     
     if commentOut {
@@ -141,7 +142,7 @@ class MethodComponents: NSObject {
       let nameNoDefault = name.strippingDefaultValue()
       
       if first {
-        if isConstructor {
+        if isConstructor || labelFirstArgument {
           header += "With\(name.capitalized):(\(type)) \(name) "
           implementation += "With\(name.capitalized):(\(type)) \(name) "
         }

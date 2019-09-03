@@ -37,10 +37,23 @@ class ClassBinding {
           continue;
       }
       if alreadyAddedMethods.contains(where: {$0 == methodPieces}) { continue }
+      
+      var isSimilar = false
+      if !methodPieces.isConstructor && methodPieces.arguments.count==1 {
+        if alreadyAddedMethods.contains(where: {
+            ($0.name == methodPieces.name) &&
+            ($0.arguments.count == methodPieces.arguments.count)
+        }) {
+          isSimilar = true
+        }
+      }
+      
+        
       alreadyAddedMethods.insert(methodPieces)
       
       methodPieces.insertRootClasses(withNames: &neededClasses)
       methodPieces.addMethod(toHeader: &header, andImplementation: &implementation,
+                             labelFirstArgument: isSimilar,
                              commentOut: methodPieces.isOperator())
     }
     

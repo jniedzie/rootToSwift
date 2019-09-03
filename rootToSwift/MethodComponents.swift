@@ -13,7 +13,7 @@ class MethodComponents: NSObject {
   var name: String
   var returnType: String
   var specifiers: [String]
-  var arguments: [(type:String, name: String)]
+  var arguments: [(type:String, name: String?)]
   var isConstructor: Bool
   
   // MARK: - Constructor
@@ -96,7 +96,7 @@ class MethodComponents: NSObject {
 
     if !lhs.specifiers.containsSameElements(as: rhs.specifiers) { return false }
     
-    func contains(a:[(String, String)], b:(String, String)) -> Bool {
+    func contains(a:[(String, String?)], b:(String, String?)) -> Bool {
       let (b1, b2) = b
       for (a1, a2) in a { if a1 == b1 && a2 == b2 { return true } }
       return false
@@ -128,9 +128,10 @@ class MethodComponents: NSObject {
     
     var first = true
     for arg in arguments {
-      let name = arg.name
+      guard let name: String = arg.name else { continue }
+      
       let type = arg.type
-      let nameNoDefault = arg.name.strippingDefaultValue()
+      let nameNoDefault = name.strippingDefaultValue()
       
       if first {
         if isConstructor {
@@ -174,10 +175,12 @@ class MethodComponents: NSObject {
     
     var first = true
     
-    for (_, name) in arguments {
+    for (_, argName) in arguments {
+      guard let arg = argName else { continue }
+      
       if first { first = false }
       else { implementation += ", " }
-      implementation += "\(name)"
+      implementation += "\(arg)"
     }
     
     if isConstructor {
@@ -255,7 +258,7 @@ class MethodComponents: NSObject {
     else {return nil }
   }
   
-  private func getArguments(methodString: String) -> [(String, String)]? {
+  private func getArguments(methodString: String) -> [(String, String?)]? {
     guard let nameAndArgs = getNameAndArgs(methodString: methodString) else { return nil }
     
     var args = Array<String>()
@@ -272,37 +275,42 @@ class MethodComponents: NSObject {
     }
     args = args.filter { !$0.trimmingCharacters(in: .whitespaces).isEmpty }
     
-    var argComponents = Array<(type: String, name: String)>()
+    var argComponents = Array<(type: String, name: String?)>()
     
     for arg in args {
-      var argComps = arg.components(separatedBy: .whitespaces)
-      argComps = argComps.filter { $0.range(of: #"(\s)*"#, options: .regularExpression) != nil && !$0.isEmpty }
-      
-      var argType = ""
-      for type in argComps[0 ..< argComps.count-1] {
-        argType += "\(type) "
-      }
-      if !argType.isEmpty { argType.removeLast() }
-      
-      var argument = (type: argType, name: argComps.last!)
-      
-      if argument.name.range(of: #"[*|&]+[\w]*"#, options: .regularExpression) != nil {
-        let starsRange = argument.name.range(of: #"[*|&]+"#, options: .regularExpression)!
-        argument.type += argument.name[starsRange]
-        argument.name.removeSubrange(starsRange)
-      }
-      if argument.type.isEmpty && !argument.name.isEmpty {
-        argument.type = argument.name
-        argument.name = "unknown_name"
-      }
-      if argument.name.isEmpty {
-        argument.name = "unknown_name"
-      }
-      argComponents.append(argument)
+      argComponents.append(breakArgumentIntoComponents(arg: arg))
     }
     return argComponents
   }
   
-
+  /**
+   Breaks string containing argument of a method into it's type and name
+   - Return: In case of anonymous parameter, name is nil
+   */
+  private func breakArgumentIntoComponents(arg: String) -> (type: String, name: String?) {
+    var argComps = arg.components(separatedBy: .whitespaces)
+    argComps = argComps.filter { $0.range(of: #"(\s)*"#, options: .regularExpression) != nil && !$0.isEmpty }
+    
+    var argType = ""
+    for type in argComps[0 ..< argComps.count-1] {
+      argType += "\(type) "
+    }
+    if !argType.isEmpty { argType.removeLast() }
+    
+    var argument:(type: String, name: String?) = (argType, nil)
+    
+    var name = argComps.last!
+    
+    if name.range(of: #"[*|&]+[\w]*"#, options: .regularExpression) != nil {
+      let starsRange = name.range(of: #"[*|&]+"#, options: .regularExpression)!
+      argument.type += name[starsRange]
+      name.removeSubrange(starsRange)
+    }
+    if !name.isEmpty {
+      if argument.type.isEmpty  { argument.type = name }
+      else                      { argument.name = name }
+    }
+    return argument
+  }
   
 }

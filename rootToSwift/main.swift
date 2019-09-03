@@ -15,41 +15,13 @@ let className       = "H2"
 let fileProcessor = FileProcessor()
 let textProcessor = TextProcessor()
 
-/**
- Fills in header and implementation files with methods. Inserts names of other classes needed by
- this class to `neededClasses` set. In case of duplicates, method will be added only once.
- */
-func fill(header: inout String, implementation: inout String,
-          withMethods methods: [String],
-          neededClasses: inout Set<String>){
-  
-  var alreadyAddedMethods = Set<MethodComponents>()
-  
-  header = textProcessor.getHeaderBeginning(className: className)
-  implementation = textProcessor.getImplementationBeginning(className: className)
-  
-  for methodText in methods {
-    guard let methodPieces = MethodComponents(methodString: methodText)
-      else{
-        print("Could not translate string:\n\(methodText)\n to a method object")
-        continue;
-    }
-    if alreadyAddedMethods.contains(where: {$0 == methodPieces}) { continue }
-    alreadyAddedMethods.insert(methodPieces)
-    
-    methodPieces.insertRootClasses(withNames: &neededClasses)
-    methodPieces.addMethod(toHeader: &header, andImplementation: &implementation)
-  }
-  
-  header += textProcessor.getHeaderEnding(className: className)
-  implementation += textProcessor.getImplementationEnding()
-}
+
 
 /**
  Generates header and implementation text of Objective-C++ binding for given ROOT class
  - Parameters:
      - className: ROOT class name to be analyzed
- - Return: tuple with header and implementation strings and other ROOT classes that this class uses
+ - Return: tuple with class bindings and set of other ROOT classes that this class uses
  */
 func getWrapperCodeForClass(className: String) -> (bindings: [ClassBinding], neededClasses:Set<String>) {
   
@@ -57,22 +29,12 @@ func getWrapperCodeForClass(className: String) -> (bindings: [ClassBinding], nee
   var classBindings = Array<ClassBinding>()
   let classesNamesAndText = fileProcessor.getClasses(fromRootHeader: className)
   
-  // Get header and implementation for each class
   for (className, classText) in classesNamesAndText {
     print("Preparing class \(className)")
     let publicMethods = fileProcessor.getPublicMethodsFromText(text: classText)
     
-    var header = ""
-    var implementation = ""
-    
-    fill(header: &header,
-         implementation: &implementation,
-         withMethods: publicMethods,
-         neededClasses: &neededClasses)
-    
-    let classBinding = ClassBinding(withName: className,
-                                    header: header,
-                                    implementation: implementation)
+    let classBinding = ClassBinding(withName: className)
+    classBinding.fill(withMethods: publicMethods, neededClasses: &neededClasses)
     classBindings.append(classBinding)
   }
   return (classBindings, neededClasses)
@@ -95,14 +57,10 @@ func generateAllNeededClasses(forClass className: String) {
       var missingIncludes = "#import \"SObject.h\"\n"
       for missingClass in missingClasses { missingIncludes += "#import \"S\(missingClass).h\"\n" }
       
-      for bindingText in addedClasses {
-        let name = bindingText.name
-        alreadyImplementedClasses.insert(name)
-        let headerTextWithIncludes = bindingText.header.replacingOccurrences(of: "#import \"SObject.h\"",
-                                                                             with: missingIncludes)
-        
-        fileProcessor.writeText(text: headerTextWithIncludes, filePath: "\(outputPath)/S\(name).h")
-        fileProcessor.writeText(text: bindingText.implementation, filePath: "\(outputPath)/S\(name).mm")
+      for classBinding in addedClasses {
+        alreadyImplementedClasses.insert(classBinding.name)
+        classBinding.add(includes: missingIncludes)
+        classBinding.write(toFile: outputPath)
       }
       
       for c in missingClasses {

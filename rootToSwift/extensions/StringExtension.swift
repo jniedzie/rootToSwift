@@ -10,6 +10,17 @@ import Foundation
 
 extension String {
   
+  /// Initializes string with contents of file
+  init (fromFile path: String) {
+    do {
+      try self.init(contentsOf: URL(fileURLWithPath: path), encoding: .utf8)
+    }
+    catch {
+      self.init()
+      print("\nERROR -- Couldn't read file: \(path)\n")
+    }
+  }
+  
   /**
    Removes what looks like default arguments declaration in C from the provided string. If there
    are no default arguments, the same string is returned
@@ -21,6 +32,7 @@ extension String {
     return self
   }
   
+  /// Returns string with first character removed
   func removingFirstCharacter() -> String {
     if self.isEmpty { return "" }
     var newString = self
@@ -28,26 +40,16 @@ extension String {
     return newString
   }
   
+  /// Replaces character at given index with a different character
   mutating func replaceCharacter(atIndex index: Int, with newChar: Character) {
     var chars = Array(self)
     chars[index] = newChar
     self = String(chars)
   }
   
-  
-  /**
-   Opens file from path and returns its content as a string
-   - Parameters:
-   - path: Input file path
-   - Returns: String containing file contents
-   */
-  init (fromFile path: String) {
-    do {
-      try self.init(contentsOf: URL(fileURLWithPath: path), encoding: .utf8)
-    }
-    catch {
-      self.init()
-      print("\nERROR -- Couldn't read file: \(path)\n")
-    }
+  /// Removes all accurencies of target string from this string
+  mutating func removeOccurencies(of target: String) {
+    self = self.replacingOccurrences(of: target, with: "")
   }
+  
 }

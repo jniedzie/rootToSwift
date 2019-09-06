@@ -8,13 +8,6 @@
 
 import Foundation
 
-enum RSError: Error {
-  /// noArgumentList Provided Method object's arguments field is nil
-  case noArgumentList
-  /// noReturnOrName Provided method string didn't contain name or return type
-  case noReturnOrName
-}
-
 /// Dictionary mapping custom root types to standard C types
 let rootTypes = [
   "Char_t"       : "char",
@@ -57,27 +50,26 @@ let rootTypes = [
   "DeclId_t"      : "const void*"
 ]
 
-/**
- Returns current date in dd/m/yyyy format as a string
- */
+
+/// Returns current date in dd/m/yyyy format as a string
 func getCurrentDate() -> String {
-  return "\(Calendar.current.component(.day, from: Date()))/\(Calendar.current.component(.month, from: Date()))/\(Calendar.current.component(.year, from: Date()))"
+  return """
+  \(Calendar.current.component(.day,    from: Date()))/\
+  \(Calendar.current.component(.month,  from: Date()))/\
+  \(Calendar.current.component(.year,   from: Date()))
+  """
 }
 
-/**
- Extracts base class name (removing prefix) from a type
- */
+/// Extracts base class name (removing prefix) from a type
 func getRootClassName(fullName: String) -> String? {
   if fullName.range(of: #"S[\w]*"#, options: .regularExpression) == nil { return nil }
   if !fullName.starts(with: "S") { return nil }
   
   var className = fullName
-  className = className.replacingOccurrences(of: "const ", with: "")
-  className = className.replacingOccurrences(of: " ", with: "")
-  className = className.replacingOccurrences(of: "&", with: "")
-  className = className.replacingOccurrences(of: "*", with: "")
+  className.removeOccurencies(of: "const ")
+  className.removeOccurencies(of: " ")
+  className.removeOccurencies(of: "&")
+  className.removeOccurencies(of: "*")
   className.removeFirst()
   return String(className)
-  
-  
 }

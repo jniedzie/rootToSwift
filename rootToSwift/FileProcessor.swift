@@ -13,6 +13,13 @@ import Foundation
  */
 class FileProcessor: NSObject {
 
+  private let commentPattern = #"(/\*([^*]|[\r\n]|(\*+([^*/]|[\r\n])))*\*+/)|(//.*)"#
+  private let templatePattern = #"[<][\s|\w]*[>]"#
+  private let implementationPattern = #"[{](\w|\s|[=]|[(]|[)]|[,]|[;]|[->]|[?]|[:])*[}]"#
+  private let returnAndNamePattern = #"[\w|\s|[*]]*"#
+  private let argumentsPattern = #"[(]([\w|\W|\s|[&]|(*)*|[,]|[=]]*)[)](\s|\w)*[;]"#
+  private let classPattern = #"[\s]*class[\w|\s]*[:]?[\w|\s|[,]|[::]]*[{]"#
+  
   /**
    Get classes declarations from ROOT header
    - Parameters:
@@ -32,19 +39,14 @@ class FileProcessor: NSObject {
    - Returns: Array of public C++ methods, one per entry
    */
   func getPublicMethodsFromText(text: String) -> [String] {
-    let commentPattern = #"(/\*([^*]|[\r\n]|(\*+([^*/]|[\r\n])))*\*+/)|(//.*)"#
-    let textTmp = text.replacingOccurrences(of: commentPattern, with: "", options: .regularExpression)
+    var textTmp = text
+    textTmp.removeRegularExpression(expression: commentPattern)
     
     var publicText = fileProcessor.getPublicFrom(text: textTmp)
-    
-    let implementationPattern = #"[{](\w|\s|[=]|[(]|[)]|[,]|[;]|[->]|[?]|[:])*[}]"#
-    publicText = publicText.replacingOccurrences(of: implementationPattern, with: ";", options: .regularExpression)
-    
-    publicText = publicText.replacingOccurrences(of: "\n", with: "")
-    publicText = publicText.replacingOccurrences(of: ";", with: ";\n")
-    
-    let returnAndNamePattern = #"[\w|\s|[*]]*"#
-    let argumentsPattern = #"[(]([\w|\W|\s|[&]|(*)*|[,]|[=]]*)[)](\s|\w)*[;]"#
+
+    publicText.replaceRegularExpression(expression: implementationPattern, with: ";")
+    publicText.removeOccurrences(of: "\n")
+    publicText.replaceOccurrences(of: ";", with: ";\n")
     
     let methodPattern = returnAndNamePattern + argumentsPattern
     
@@ -66,45 +68,48 @@ class FileProcessor: NSObject {
 // Private methods
 //------------------------------------------------------------------------
   
+  private func getClassNameAndRange(fromText text: String) -> (name: String, range: Range<String.Index>)? {
+    guard let range = text.range(of: classPattern, options: .regularExpression) else { return nil }
+    
+    var name = String(text[range])
+    name = String(name.split(separator: " ")[1])
+    name.removeFirst()
+    name.removeOccurrences(of: ":")
+    return (name, range)
+  }
+  
+  private func findFirstUnopenedBracket(inText text: String, startingFrom index: String.Index) -> String.Index {
+    var unclosedBrackets = 1
+    var iter = index
+    
+    while unclosedBrackets > 0 {
+      if text[iter] == "{" { unclosedBrackets += 1 }
+      if text[iter] == "}" { unclosedBrackets -= 1 }
+      iter = text.index(iter, offsetBy: 1)
+    }
+    
+    return iter
+  }
+  
   /**
    Finds all class declarations inside of a single string and splits them into array of strings
    */
   private func getClassesFromText(text: String) -> [(name:String, text: String)] {
-    let commentPattern = #"(/\*([^*]|[\r\n]|(\*+([^*/]|[\r\n])))*\*+/)|(//.*)"#
-    var textTmp = text.replacingOccurrences(of: commentPattern, with: "", options: .regularExpression)
-    
-    let templatePattern = #"[<][\s|\w]*[>]"#
-    textTmp = textTmp.replacingOccurrences(of: templatePattern, with: "", options: .regularExpression)
-    
-    let classPattern = #"[\s]*class[\w|\s]*[:]?[\w|\s|[,]|[::]]*[{]"#
+    var textTmp = text
+    textTmp.removeRegularExpression(expression: commentPattern)
+    textTmp.removeRegularExpression(expression: templatePattern)
+
     var classes = Array<(name: String, text: String)>()
     
-    var foundClass = true
-    while foundClass {
-      foundClass = false
+    while true {
+      guard let (name, range) = getClassNameAndRange(fromText: textTmp) else { break }
+
+      let classEnd = findFirstUnopenedBracket(inText: textTmp, startingFrom: range.upperBound)
+      let classRange = range.lowerBound...classEnd
+      let classText = String(textTmp[classRange])
+      textTmp.removeSubrange(classRange)
       
-      if let classNameRange = textTmp.range(of: classPattern, options: .regularExpression) {
-        var className = String(textTmp[classNameRange])
-        className = String(className.split(separator: " ")[1])
-        if className.first == "T" { className.removeFirst() }
-        className = className.replacingOccurrences(of: ":", with: "")
-        
-        var unclosedBrackets = 1
-        var iter = classNameRange.upperBound
-        
-        while unclosedBrackets > 0 {
-          if textTmp[iter] == "{" { unclosedBrackets += 1 }
-          if textTmp[iter] == "}" { unclosedBrackets -= 1 }
-          iter = textTmp.index(iter, offsetBy: 1)
-        }
-        
-        let classRange = classNameRange.lowerBound...iter
-        
-        let classText = String(textTmp[classRange])
-        textTmp.removeSubrange(classRange)
-        foundClass = true
-        classes.append((className, classText))
-      }
+      classes.append((name, classText))
     }
     return classes
   }
@@ -112,7 +117,7 @@ class FileProcessor: NSObject {
   /**
    Selects only lines that are after "public:" keyword and not after "private:" or "protected:"
    - Parameters:
-   - text: text to be filtered
+       - text: text to be filtered
    - Returns: Text filtered from non "public:" lines
    */
   private func getPublicFrom(text: String) -> String {

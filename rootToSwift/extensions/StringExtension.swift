@@ -57,14 +57,23 @@ extension String {
     self = String(chars)
   }
   
-  /// Removes all accurencies of target string from this string
+  /// Removes all occurrences of target string from this string
   mutating func removeOccurrences(of target: String) {
     self = self.replacingOccurrences(of: target, with: "")
   }
   
-  /// Replaces all accurencies of target string with replacement string
+  /// Replaces all occurrences of target string with replacement string
   mutating func replaceOccurrences(of target: String, with replacement: String) {
     self = self.replacingOccurrences(of: target, with: replacement)
   }
   
+  /// Removes all occurrences of regular expression from string
+  mutating func removeRegularExpression(expression: String) {
+    self = self.replacingOccurrences(of: expression, with: "", options: .regularExpression)
+  }
+  
+  /// Replaces all occurrences of regular expression with replacement string
+  mutating func replaceRegularExpression(expression: String, with replacement: String) {
+    self = self.replacingOccurrences(of: expression, with: replacement, options: .regularExpression)
+  }
 }

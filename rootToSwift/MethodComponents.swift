@@ -8,13 +8,25 @@
 
 import Foundation
 
-class MethodComponents: NSObject {
+class MethodComponents: Hashable {
   // MARK: - Properties
   var name: String
   var returnType: String
   var specifiers: [String]
   var arguments: [(type:String, name: String?)]
   var isConstructor: Bool
+  
+  func hash(into hasher: inout Hasher) {
+    hasher.combine(name)
+    hasher.combine(returnType)
+    hasher.combine(specifiers.sorted())
+    
+    for (type, name) in arguments {
+      hasher.combine(type)
+      hasher.combine(name)
+    }
+    hasher.combine(isConstructor)
+  }
   
   // MARK: - Constructor
   /**
@@ -29,8 +41,6 @@ class MethodComponents: NSObject {
     self.specifiers = [""]
     self.arguments = [(type:"", name:"")]
     self.isConstructor = false
-    
-    super.init()
     
     // Get method name
     guard let name = getName(methodString: methodString) else { return nil }
@@ -64,10 +74,10 @@ class MethodComponents: NSObject {
     
     // Replace root types by default C types
     for (rootType, cType) in rootTypes {
-      self.returnType = self.returnType.replacingOccurrences(of: rootType, with: cType)
+      self.returnType.replaceOccurrences(of: rootType, with: cType)
       
       for i in self.arguments.indices {
-        self.arguments[i].type = self.arguments[i].type.replacingOccurrences(of: rootType, with: cType)
+        self.arguments[i].type.replaceOccurrences(of: rootType, with: cType)
       }
     }
     
@@ -83,26 +93,9 @@ class MethodComponents: NSObject {
   
   /// Comparison operator
   static func ==(lhs: MethodComponents, rhs: MethodComponents) -> Bool{
-    
-    if lhs.name != rhs.name { return false }
-    if lhs.returnType != rhs.returnType { return false }
-    if lhs.isConstructor != rhs.isConstructor { return false }
-
-    if !lhs.specifiers.containsSameElements(as: rhs.specifiers) { return false }
-    
-    func contains(a:[(String, String?)], b:(String, String?)) -> Bool {
-      let (b1, b2) = b
-      for (a1, a2) in a { if a1 == b1 && a2 == b2 { return true } }
-      return false
-    }
-    
-    if lhs.arguments.count != rhs.arguments.count { return false }
-    
-    for arg in lhs.arguments {
-      if !contains(a: rhs.arguments, b: arg) { return false }
-    }
-    
-    return true
+    var hasherA = Hasher(); lhs.hash(into: &hasherA)
+    var hasherB = Hasher(); rhs.hash(into: &hasherB)
+    return hasherA.finalize() == hasherB.finalize()
   }
   
   // MARK: - Public methods

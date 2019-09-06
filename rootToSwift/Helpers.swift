@@ -66,10 +66,10 @@ func getRootClassName(fullName: String) -> String? {
   if !fullName.starts(with: "S") { return nil }
   
   var className = fullName
-  className.removeOccurencies(of: "const ")
-  className.removeOccurencies(of: " ")
-  className.removeOccurencies(of: "&")
-  className.removeOccurencies(of: "*")
+  className.removeOccurrences(of: "const ")
+  className.removeOccurrences(of: " ")
+  className.removeOccurrences(of: "&")
+  className.removeOccurrences(of: "*")
   className.removeFirst()
   return String(className)
 }

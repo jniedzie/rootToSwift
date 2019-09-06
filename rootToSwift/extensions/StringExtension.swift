@@ -21,6 +21,16 @@ extension String {
     }
   }
   
+  /// Saves string to file
+  func save(toPath path: String) {
+    do    {
+      try self.write(to: URL(fileURLWithPath: path), atomically: true, encoding: .utf8)
+    }
+    catch {
+      print("Could not save file")
+    }
+  }
+  
   /**
    Removes what looks like default arguments declaration in C from the provided string. If there
    are no default arguments, the same string is returned
@@ -48,8 +58,13 @@ extension String {
   }
   
   /// Removes all accurencies of target string from this string
-  mutating func removeOccurencies(of target: String) {
+  mutating func removeOccurrences(of target: String) {
     self = self.replacingOccurrences(of: target, with: "")
+  }
+  
+  /// Replaces all accurencies of target string with replacement string
+  mutating func replaceOccurrences(of target: String, with replacement: String) {
+    self = self.replacingOccurrences(of: target, with: replacement)
   }
   
 }

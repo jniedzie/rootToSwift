@@ -71,8 +71,9 @@ class ClassBinding {
     header = header.replacingOccurrences(of: "#import \"SObject.h\"", with: includes)
   }
   
+  /// Writes both header and implementation to a file
   func write(toFile path: String) {
-    fileProcessor.writeText(text: header, filePath: "\(path)/S\(name).h")
-    fileProcessor.writeText(text: implementation, filePath: "\(path)/S\(name).mm")
+    header.save(toPath: "\(path)/S\(name).h")
+    implementation.save(toPath: "\(path)/S\(name).mm")
   }
 }

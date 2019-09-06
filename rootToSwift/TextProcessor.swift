@@ -12,7 +12,7 @@ class TextProcessor {
   /**
    Creates beginnig of the wrapper's header
    - Parameters:
-   - className: Output class name ("S" prefix will be added to it)
+       - className: Output class name ("S" prefix will be added to it)
    - Returns: String containing beginning of the header
    */
   func getHeaderBeginning(className: String) -> String {
@@ -36,7 +36,7 @@ class TextProcessor {
   /**
    Creates ending of the wrapper's header
    - Parameters:
-   - className: Output class name ("S" prefix will be added to it)
+       - className: Output class name ("S" prefix will be added to it)
    - Returns: String containing ending of the header
    */
   func getHeaderEnding(className: String) -> String {
@@ -50,7 +50,7 @@ class TextProcessor {
   /**
    Creates beginnig of the wrapper's implementation
    - Parameters:
-     - className: Output class name ("S" prefix will be added to it)
+       - className: Output class name ("S" prefix will be added to it)
    - Returns: String containing beginning of the header
    */
   func getImplementationBeginning(className: String) -> String {
@@ -88,7 +88,7 @@ class TextProcessor {
   /**
    Creates ending of the wrapper's implementation
    - Parameters:
-     - className: Output class name ("S" prefix will be added to it)
+       - className: Output class name ("S" prefix will be added to it)
    - Returns: String containing ending of the header
    */
   func getImplementationEnding() -> String {

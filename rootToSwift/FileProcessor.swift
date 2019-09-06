@@ -62,17 +62,6 @@ class FileProcessor: NSObject {
     return publicMethods
   }
   
-  /**
-   Writes string to a file
-   - Parameters:
-      - text: Text to be written to a file
-      - filePath: path for the output file
-   */
-  func writeText(text: String, filePath: String) -> Void {
-    do    { try text.write(to: URL(fileURLWithPath: filePath), atomically: true, encoding: .utf8) }
-    catch { print("Could not save file")}
-  }
-  
 //------------------------------------------------------------------------
 // Private methods
 //------------------------------------------------------------------------

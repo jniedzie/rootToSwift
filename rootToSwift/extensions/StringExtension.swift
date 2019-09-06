@@ -33,4 +33,21 @@ extension String {
     chars[index] = newChar
     self = String(chars)
   }
+  
+  
+  /**
+   Opens file from path and returns its content as a string
+   - Parameters:
+   - path: Input file path
+   - Returns: String containing file contents
+   */
+  init (fromFile path: String) {
+    do {
+      try self.init(contentsOf: URL(fileURLWithPath: path), encoding: .utf8)
+    }
+    catch {
+      self.init()
+      print("\nERROR -- Couldn't read file: \(path)\n")
+    }
+  }
 }

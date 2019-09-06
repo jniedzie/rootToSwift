@@ -75,12 +75,20 @@
 				1F4E655A22FC46C3001225FC /* FileProcessor.swift */,
 				1F9FA9A223057E7400F9723C /* MethodComponents.swift */,
 				1FAB8B92231D4DFB004E3023 /* ClassBinding.swift */,
-				1F9FA9A0230578FE00F9723C /* Helpers.swift */,
 				1FAB88E023193C06004E3023 /* TextProcessor.swift */,
+				1F9FA9A0230578FE00F9723C /* Helpers.swift */,
+				1F53B1E623228C8D00896F70 /* extensions */,
+			);
+			path = rootToSwift;
+			sourceTree = "<group>";
+		};
+		1F53B1E623228C8D00896F70 /* extensions */ = {
+			isa = PBXGroup;
+			children = (
 				1F4E657A23043DE1001225FC /* ArrayExtension.swift */,
 				1FAB8B94231D5928004E3023 /* StringExtension.swift */,
 			);
-			path = rootToSwift;
+			path = extensions;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */

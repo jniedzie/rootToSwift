@@ -65,14 +65,16 @@ func getCurrentDate() -> String {
  Extracts base class name (removing prefix) from a type
  */
 func getRootClassName(fullName: String) -> String? {
-  if fullName.range(of: #"S[\w]*"#, options: .regularExpression) != nil {
-    var className = fullName
-    className = className.replacingOccurrences(of: "const ", with: "")
-    className = className.replacingOccurrences(of: " ", with: "")
-    className = className.replacingOccurrences(of: "&", with: "")
-    className = className.replacingOccurrences(of: "*", with: "")
-    className.removeFirst()
-    return String(className)
-  }
-  return nil
+  if fullName.range(of: #"S[\w]*"#, options: .regularExpression) == nil { return nil }
+  if !fullName.starts(with: "S") { return nil }
+  
+  var className = fullName
+  className = className.replacingOccurrences(of: "const ", with: "")
+  className = className.replacingOccurrences(of: " ", with: "")
+  className = className.replacingOccurrences(of: "&", with: "")
+  className = className.replacingOccurrences(of: "*", with: "")
+  className.removeFirst()
+  return String(className)
+  
+  
 }

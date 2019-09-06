@@ -9,15 +9,19 @@
 import Foundation
 
 class ClassBinding {
+  // MARK: - properties
+  var name: String
+  var header: String
+  var implementation: String
+  
+  // MARK: - constructors
   required init(withName _name: String, header _header: String = "", implementation _impl: String = ""){
     self.name = _name
     self.header = _header
     self.implementation = _impl
   }
   
-  var name: String
-  var header: String
-  var implementation: String
+  // MARK: - public methods
   
   /**
    Fills in header and implementation files with methods. Inserts names of other classes needed by
@@ -39,7 +43,7 @@ class ClassBinding {
       if alreadyAddedMethods.contains(where: {$0 == methodPieces}) { continue }
       
       var isSimilar = false
-      if !methodPieces.isConstructor && methodPieces.arguments.count==1 {
+      if !methodPieces.isConstructor {
         if alreadyAddedMethods.contains(where: {
             ($0.name == methodPieces.name) &&
             ($0.arguments.count == methodPieces.arguments.count)

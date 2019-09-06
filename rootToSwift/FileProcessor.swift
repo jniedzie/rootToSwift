@@ -42,7 +42,10 @@ class FileProcessor: NSObject {
     let commentPattern = #"(/\*([^*]|[\r\n]|(\*+([^*/]|[\r\n])))*\*+/)|(//.*)"#
     var textTmp = text.replacingOccurrences(of: commentPattern, with: "", options: .regularExpression)
     
-    let classPattern = #"[\s]*class[\w|\s]*[:]?[\w|\s|[,]]*[{]"#
+    let templatePattern = #"[<][\s|\w]*[>]"#
+    textTmp = textTmp.replacingOccurrences(of: templatePattern, with: "", options: .regularExpression)
+    
+    let classPattern = #"[\s]*class[\w|\s]*[:]?[\w|\s|[,]|[::]]*[{]"#
     var classes = Array<(name: String, text: String)>()
     
     var foundClass = true
@@ -52,7 +55,7 @@ class FileProcessor: NSObject {
       if let classNameRange = textTmp.range(of: classPattern, options: .regularExpression) {
         var className = String(textTmp[classNameRange])
         className = String(className.split(separator: " ")[1])
-        className.removeFirst()
+        if className.first == "T" { className.removeFirst() }
         className = className.replacingOccurrences(of: ":", with: "")
         
         var unclosedBrackets = 1

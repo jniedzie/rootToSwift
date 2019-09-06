@@ -71,20 +71,10 @@ class MethodComponents: NSObject {
       }
     }
     
-    if self.returnType.contains("TT") {
-      self.returnType = self.returnType.replacingOccurrences(of: "TT", with: "ST")
-    }
-    else {
-      self.returnType = self.returnType.replacingOccurrences(of: "T", with: "S")
-    }
+    if self.returnType.first == "T" { self.returnType.replaceCharacter(atIndex: 0, with: "S") }
     
     for i in self.arguments.indices {
-      if self.arguments[i].type.contains("TT") {
-        self.arguments[i].type = self.arguments[i].type.replacingOccurrences(of: "TT", with: "ST")
-      }
-      else{
-        self.arguments[i].type = self.arguments[i].type.replacingOccurrences(of: "T", with: "S")
-      }
+      if self.arguments[i].type.first == "T" { self.arguments[i].type.replaceCharacter(atIndex: 0, with: "S") }
     }
     
   }
@@ -252,10 +242,37 @@ class MethodComponents: NSObject {
   }
   
   // MARK: - Private methods
+  /**
+   Separates provided string into method name and method's arguments
+   */
   private func getNameAndArgs(methodString: String) -> [String]? {
-    var nameAndArgs = methodString.components(separatedBy: "(")
-    nameAndArgs = nameAndArgs.filter { $0 != "" }
-    return nameAndArgs.filter { !$0.starts(with: ")") }
+    var startIndex: String.Index?
+    var endIndex: String.Index?
+    
+    for index in methodString.indices {
+      if startIndex != nil, endIndex != nil { break }
+      
+      if startIndex==nil, methodString[index]=="(" { startIndex = index }
+      if endIndex==nil, methodString[index]==")" { endIndex = index }
+    }
+    
+    if startIndex==nil || endIndex==nil {
+      print("Could not find method name and arguments in method:\(methodString)")
+      return nil
+    }
+    
+    var nameAndArgs = [methodString[methodString.startIndex..<startIndex!]]
+    
+    if methodString.index(startIndex!, offsetBy: 1) < endIndex! {
+       nameAndArgs.append(methodString[methodString.index(startIndex!, offsetBy: 1)..<endIndex!])
+    }
+    
+    nameAndArgs = nameAndArgs.filter { !$0.isEmpty }
+    
+    var nameAndArgsString = [String]()
+    for na in nameAndArgs { nameAndArgsString.append(String(na)) }
+    
+    return nameAndArgsString
   }
   
   private func getReturnTypeAndName(methodString: String) -> [String]? {
@@ -275,7 +292,11 @@ class MethodComponents: NSObject {
   }
   
   private func getReturnType(methodString: String) -> String? {
-    if let returnAndName = getReturnTypeAndName(methodString: methodString) {
+    if var returnAndName = getReturnTypeAndName(methodString: methodString) {
+      var returnType = returnAndName[0..<returnAndName.count-1]
+      returnType.removeAll(where: {$0 == "virtual"})
+      
+      if returnType.isEmpty { return nil }
       return returnAndName.secondToLast()
     }
     else {return nil }

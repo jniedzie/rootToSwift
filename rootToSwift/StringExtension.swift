@@ -28,4 +28,9 @@ extension String {
     return newString
   }
   
+  mutating func replaceCharacter(atIndex index: Int, with newChar: Character) {
+    var chars = Array(self)
+    chars[index] = newChar
+    self = String(chars)
+  }
 }

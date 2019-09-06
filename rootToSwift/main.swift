@@ -20,17 +20,18 @@ let outputPath      = "/Users/jeremi/Library/Mobile Documents/com~apple~CloudDoc
      - className: ROOT class name to be analyzed
  - Return: tuple with class bindings and set of other ROOT classes that this class uses
  */
-func getWrapperCodeForClass(className: String) -> (bindings: [ClassBinding], neededClasses:Set<String>) {
+func getWrapperCode(forClass name:String) -> (bindings: [ClassBinding], neededClasses:Set<String>) {
   
   var neededClasses = Set<String>()
   var classBindings = Array<ClassBinding>()
-  let classesNamesAndText = fileProcessor.getClasses(fromRootHeader: className)
+  let classesNamesAndText = fileProcessor.getClasses(fromRootHeader: name)
   
-  for (className, classText) in classesNamesAndText {
-    print("Preparing class \(className)")
+  for (name, classText) in classesNamesAndText {
+    print("Preparing class \(name)")
+    
     let publicMethods = fileProcessor.getPublicMethodsFromText(text: classText)
     
-    let classBinding = ClassBinding(withName: className)
+    let classBinding = ClassBinding(withName: name)
     classBinding.fill(withMethods: publicMethods, neededClasses: &neededClasses)
     classBindings.append(classBinding)
   }
@@ -42,14 +43,14 @@ func getWrapperCodeForClass(className: String) -> (bindings: [ClassBinding], nee
  */
 func generateAllNeededClasses(forClass className: String) {
   var alreadyImplementedClasses: Set = ["Object"]
-  var neededClasses: Set = ["H2"]
+  var neededClasses: Set = [className]
   
   while neededClasses.count != 0 {
     var newNeededClasses = Set<String>()
     
     for className in neededClasses {
       if alreadyImplementedClasses.contains(className) { continue }
-      let (addedClasses, missingClasses) = getWrapperCodeForClass(className: className)
+      let (addedClasses, missingClasses) = getWrapperCode(forClass: className)
       
       var missingIncludes = "#import \"SObject.h\"\n"
       for missingClass in missingClasses {
@@ -74,7 +75,7 @@ func generateAllNeededClasses(forClass className: String) {
 }
 
 func main() {
-  let className       = "H2"
+  let className = "H2"
   
   // Generate bindings:
   generateAllNeededClasses(forClass: className)

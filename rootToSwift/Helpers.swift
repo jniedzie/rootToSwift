@@ -52,6 +52,9 @@ let rootTypes = [
   "Coord_t"      : "double",
   "Angle_t"      : "double",
   "Size_t"       : "double",
+  
+  "TObjLinkPtr_t" : "TObjLink*",
+  "DeclId_t"      : "const void*"
 ]
 
 /**

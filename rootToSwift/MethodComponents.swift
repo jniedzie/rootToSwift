@@ -150,6 +150,11 @@ class MethodComponents: NSObject {
         implementation += "\(nameNoDefault):(\(type)) \(name) "
       }
     }
+    if arguments.isEmpty && labelFirstArgument {
+      header          += specifiers.contains("const") ? "Const " : "NonConst "
+      implementation  += specifiers.contains("const") ? "Const " : "NonConst "
+    }
+    
     header += ";\n"
     addMethod(toImplementation: &implementation)
     
@@ -224,12 +229,12 @@ class MethodComponents: NSObject {
    */
   func insertRootClasses(withNames names: inout Set<String>) {
     if let name = getRootClassName(fullName: returnType) {
-      names.insert(name)
+      if !name.isEmpty { names.insert(name) }
     }
     
     for arg in arguments {
       if let name = getRootClassName(fullName: arg.type) {
-        names.insert(name)
+        if !name.isEmpty { names.insert(name) }
       }
     }
   }
@@ -278,7 +283,8 @@ class MethodComponents: NSObject {
   private func getReturnTypeAndName(methodString: String) -> [String]? {
     if let nameAndArgs = getNameAndArgs(methodString: methodString) {
       var returnAndName = nameAndArgs[0].components(separatedBy: .whitespaces)
-      returnAndName = returnAndName.filter { $0 != "" }
+      if returnAndName.contains("struct") { return nil }
+      returnAndName = returnAndName.filter { !$0.isEmpty }
       return returnAndName
     }
     else {return nil }

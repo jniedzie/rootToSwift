@@ -75,7 +75,7 @@ func generateAllNeededClasses(forClass className: String) {
 }
 
 func main() {
-  let className = "H2"
+  let className = "GButton"
   
   // Generate bindings:
   generateAllNeededClasses(forClass: className)

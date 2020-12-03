@@ -11,7 +11,7 @@ import Foundation
 extension String {
   
   /// Initializes string with contents of file
-  init (fromFile path: String) {
+  init(fromFile path: String) {
     do {
       try self.init(contentsOf: URL(fileURLWithPath: path), encoding: .utf8)
     }

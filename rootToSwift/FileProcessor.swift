@@ -26,7 +26,9 @@ class FileProcessor: NSObject {
        - rootHeader: Base ROOT header name, e.g. `Browser` for `TBrowser.h`
    - Returns: Array of classes names and corresponding C++ declaration read from ROOT header
    */
-  func getClasses(fromRootHeader rootHeader: String) -> [(name: String, text: String)] {
+  func getClasses(fromRootHeader rootHeader: String) -> [(name: String, text: String)] { 
+    let rootHeader = trickyHeaders[rootHeader] ?? rootHeader
+    
     let rootClassPath       = "\(rootIncludePath)/T\(rootHeader).h"
     let inputText           = String(fromFile: rootClassPath)
     return getClassesFromText(text: inputText)
@@ -56,12 +58,45 @@ class FileProcessor: NSObject {
     
     for line in textByLine {
       if line.range(of: methodPattern, options: .regularExpression) != nil &&
-        line.range(of: #"ClassDef*"#, options: .regularExpression) == nil &&
-        line.range(of: #"(\w|\s)*[~](\w|\s|[(]|[)]|[;])*"#, options: .regularExpression) == nil {
+          line.range(of: #"operator"#, options: .regularExpression) == nil &&
+          line.range(of: #"ClassDef*"#, options: .regularExpression) == nil &&
+          line.range(of: #"(\w|\s)*[~](\w|\s|[(]|[)]|[;])*"#, options: .regularExpression) == nil {
         publicMethods.append(line)
       }
     }
     return publicMethods
+  }
+  
+  /**
+   Finds public C++ methods in a string
+   - Parameters:
+   - text: text in which to find public C++ methods
+   - Returns: Array of public C++ methods, one per entry
+   */
+  func getPublicEnumsFromText(text: String) -> [String] {
+    var textTmp = text
+    textTmp.removeRegularExpression(expression: commentPattern)
+    
+    var publicText = fileProcessor.getPublicFrom(text: textTmp)
+
+    publicText.removeOccurrences(of: "\n")
+    publicText.replaceOccurrences(of: ";", with: ";\n")
+
+    let enumPattern = #"[\s]*enum[.]*"#
+    var publicEnums: [String] = []
+    
+    let textByLine = publicText.components(separatedBy: .newlines)
+    
+    for line in textByLine {
+      if line.range(of: enumPattern, options: .regularExpression) != nil &&
+          line.range(of: #"ClassDef*"#, options: .regularExpression) == nil &&
+          line.range(of: #"(\w|\s)*[~](\w|\s|[(]|[)]|[;])*"#, options: .regularExpression) == nil {
+      
+        publicEnums.append(line)
+      }
+    }
+    
+    return publicEnums
   }
   
 //------------------------------------------------------------------------
@@ -81,7 +116,7 @@ class FileProcessor: NSObject {
   private func findFirstUnopenedBracket(inText text: String, startingFrom index: String.Index) -> String.Index {
     var unclosedBrackets = 1
     var iter = index
-    
+   
     while unclosedBrackets > 0 {
       if text[iter] == "{" { unclosedBrackets += 1 }
       if text[iter] == "}" { unclosedBrackets -= 1 }

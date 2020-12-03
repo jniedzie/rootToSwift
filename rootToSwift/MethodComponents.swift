@@ -36,6 +36,10 @@ class MethodComponents: Hashable {
    */
   required init?(methodString: String){
     
+    if methodString.range(of: "siz_t", options: .regularExpression) != nil {
+      
+    }
+    
     self.name = ""
     self.returnType = ""
     self.specifiers = [""]
@@ -45,6 +49,8 @@ class MethodComponents: Hashable {
     // Get method name
     guard let name = getName(methodString: methodString) else { return nil }
     self.name = name
+    
+    if name.range(of: "operator", options: .regularExpression) != nil { return nil }
     
     // Get return type
     if let returnType = getReturnType(methodString: methodString){
@@ -73,12 +79,18 @@ class MethodComponents: Hashable {
     }
     
     // Replace root types by default C types
-    for (rootType, cType) in rootTypes {
-      self.returnType.replaceOccurrences(of: rootType, with: cType)
+//    for (rootType, cType) in rootTypes {
+//      self.returnType.replaceOccurrences(of: rootType, with: cType)
       
-      for i in self.arguments.indices {
-        self.arguments[i].type.replaceOccurrences(of: rootType, with: cType)
-      }
+//      for i in self.arguments.indices {
+//        self.arguments[i].type.replaceOccurrences(of: rootType, with: cType)
+//      }
+//    }
+    
+    self.returnType = rootTypes[self.returnType] ?? self.returnType
+    
+    for i in self.arguments.indices {
+      self.arguments[i].type = rootTypes[self.arguments[i].type] ?? self.arguments[i].type
     }
     
     if self.returnType.first == "T" { self.returnType.replaceCharacter(atIndex: 0, with: "S") }
@@ -221,14 +233,28 @@ class MethodComponents: Hashable {
       - withNames: set to which found ROOT classes will be inserted
    */
   func insertRootClasses(withNames names: inout Set<String>) {
+    
     if let name = getRootClassName(fullName: returnType) {
+      
+      if name == "Tsiz_t" || name == "siz_t" {
+        
+      }
+      
       if !name.isEmpty { names.insert(name) }
     }
     
     for arg in arguments {
       if let name = getRootClassName(fullName: arg.type) {
+        
+        if name == "Tsiz_t" || name == "siz_t" {
+          
+        }
+        
         if !name.isEmpty { names.insert(name) }
       }
+      
+      
+      
     }
   }
   

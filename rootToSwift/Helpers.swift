@@ -13,6 +13,8 @@ let rootTypes = [
   "Char_t"       : "char",
   "UChar_t"      : "unsigned char",
   "Short_t"      : "short",
+  "Short_t*"     : "short*",
+  "Short_t&"     : "short&",
   "UShort_t"     : "unsigned short",
   "Int_t"        : "int",
   "UInt_t"       : "unsigned int",
@@ -30,7 +32,11 @@ let rootTypes = [
   "Byte_t"       : "unsigned char",
   "Version_t"    : "short",
   "Option_t"     : "const char",
+  "Tsiz_t"       : "int",
   "Ssiz_t"       : "int",
+  "Ssiz_t*"      : "int*",
+  "Ssiz_t&"      : "int&",
+  "siz_t"        : "int",
   "Real_t"       : "double",
   "Long64_t"     : "long long",
   "ULong64_t"    : "unsigned long long",
@@ -47,9 +53,23 @@ let rootTypes = [
   "Size_t"       : "double",
   
   "TObjLinkPtr_t" : "TObjLink*",
-  "DeclId_t"      : "const void*"
+  "DeclId_t"      : "const void*",
+  "TDictionary::DeclId_t" : "const void*",
+  
+//  Cheating with these ones:
+  "TypedefInfo_t"     : "void*",
+  "TypedefInfo_t*"    : "void*",
+  "ypedefInfo_t"      : "void*",
+  "ShowMembersFunc_t" : "void*",
 ]
 
+
+let trickyHeaders = [
+  "GMainFrame" : "Frame",
+  "ErrorLock" : "Collection",
+  "DeclNameRegistry" : "Class",
+  
+]
 
 /// Returns current date in dd/m/yyyy format as a string
 func getCurrentDate() -> String {

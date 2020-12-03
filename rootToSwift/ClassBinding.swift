@@ -27,19 +27,31 @@ class ClassBinding {
    Fills in header and implementation files with methods. Inserts names of other classes needed by
    this class to `neededClasses` set. In case of duplicates, method will be added only once.
    */
-  func fill(withMethods methods: [String], neededClasses: inout Set<String>){
+  func fill(withMethods methods: [String], enums: [String], neededClasses: inout Set<String>){
     
     var alreadyAddedMethods = Set<MethodComponents>()
+    
     
     header = textProcessor.getHeaderBeginning(className: name)
     implementation = textProcessor.getImplementationBeginning(className: name)
     
+    for enumText in enums {
+      guard let enumPieces = EnumComponents(enumString: enumText)
+        else{
+          print("Could not translate string:\n\(enumText)\n to a enum object")
+          continue;
+      }
+      
+      enumPieces.addEnum(toHeader: &header)
+    }
+    
     for methodText in methods {
       guard let methodPieces = MethodComponents(methodString: methodText)
         else{
-          print("Could not translate string:\n\(methodText)\n to a method object")
+//          print("Could not translate string:\n\(methodText)\n to a method object")
           continue;
       }
+      
       if alreadyAddedMethods.contains(where: {$0 == methodPieces}) { continue }
       
       var isSimilar = false
@@ -67,12 +79,12 @@ class ClassBinding {
   
   
   /// Adds provided includes in the include section of the header
-  func add(includes: String) {
+  func addIncludes(_ includes: String) {
     header = header.replacingOccurrences(of: "#import \"SObject.h\"", with: includes)
   }
   
   /// Writes both header and implementation to a file
-  func write(toFile path: String) {
+  func writeToFile(_ path: String) {
     header.save(toPath: "\(path)/S\(name).h")
     implementation.save(toPath: "\(path)/S\(name).mm")
   }

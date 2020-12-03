@@ -10,6 +10,7 @@
 		1F4E655422FC40BB001225FC /* main.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1F4E655322FC40BB001225FC /* main.swift */; };
 		1F4E655B22FC46C3001225FC /* FileProcessor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1F4E655A22FC46C3001225FC /* FileProcessor.swift */; };
 		1F4E657B23043DE1001225FC /* ArrayExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1F4E657A23043DE1001225FC /* ArrayExtension.swift */; };
+		1F896B792578E7FB00D91239 /* EnumComponents.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1F896B782578E7FB00D91239 /* EnumComponents.swift */; };
 		1F9FA9A1230578FE00F9723C /* Helpers.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1F9FA9A0230578FE00F9723C /* Helpers.swift */; };
 		1F9FA9A323057E7400F9723C /* MethodComponents.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1F9FA9A223057E7400F9723C /* MethodComponents.swift */; };
 		1FAB88E123193C06004E3023 /* TextProcessor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1FAB88E023193C06004E3023 /* TextProcessor.swift */; };
@@ -34,6 +35,7 @@
 		1F4E655322FC40BB001225FC /* main.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = main.swift; sourceTree = "<group>"; };
 		1F4E655A22FC46C3001225FC /* FileProcessor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileProcessor.swift; sourceTree = "<group>"; };
 		1F4E657A23043DE1001225FC /* ArrayExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ArrayExtension.swift; sourceTree = "<group>"; };
+		1F896B782578E7FB00D91239 /* EnumComponents.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EnumComponents.swift; sourceTree = "<group>"; };
 		1F9FA9A0230578FE00F9723C /* Helpers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Helpers.swift; sourceTree = "<group>"; };
 		1F9FA9A223057E7400F9723C /* MethodComponents.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MethodComponents.swift; sourceTree = "<group>"; };
 		1FAB88E023193C06004E3023 /* TextProcessor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextProcessor.swift; sourceTree = "<group>"; };
@@ -73,6 +75,7 @@
 			children = (
 				1F4E655322FC40BB001225FC /* main.swift */,
 				1F4E655A22FC46C3001225FC /* FileProcessor.swift */,
+				1F896B782578E7FB00D91239 /* EnumComponents.swift */,
 				1F9FA9A223057E7400F9723C /* MethodComponents.swift */,
 				1FAB8B92231D4DFB004E3023 /* ClassBinding.swift */,
 				1FAB88E023193C06004E3023 /* TextProcessor.swift */,
@@ -153,6 +156,7 @@
 				1F4E657B23043DE1001225FC /* ArrayExtension.swift in Sources */,
 				1F4E655422FC40BB001225FC /* main.swift in Sources */,
 				1FAB8B95231D5928004E3023 /* StringExtension.swift in Sources */,
+				1F896B792578E7FB00D91239 /* EnumComponents.swift in Sources */,
 				1F4E655B22FC46C3001225FC /* FileProcessor.swift in Sources */,
 				1F9FA9A1230578FE00F9723C /* Helpers.swift in Sources */,
 				1FAB88E123193C06004E3023 /* TextProcessor.swift in Sources */,
@@ -281,7 +285,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_TEAM = V5WJKFTQN5;
+				DEVELOPMENT_TEAM = LU2V5679KF;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 5.0;
 			};
@@ -291,7 +295,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_TEAM = V5WJKFTQN5;
+				DEVELOPMENT_TEAM = LU2V5679KF;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 5.0;
 			};
